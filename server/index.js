@@ -1,7 +1,8 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
+
 const express = require("express");
 const mongoose = require("mongoose");
-const path = require("path");
 const todoRoutes = require("./routes/todoRoutes");
 
 const app = express();
@@ -32,9 +33,17 @@ app.get("/{*splat}", (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001;
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+if (!mongoUri) {
+  console.error(
+    "Missing MongoDB connection string. Set MONGODB_URI or MONGO_URI in server/.env"
+  );
+  process.exit(1);
+}
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(mongoUri)
   .then(() => {
     console.log("Connected to MongoDB");
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
